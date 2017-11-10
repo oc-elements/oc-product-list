@@ -1,36 +1,146 @@
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-card/paper-card.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../oc-product-api/oc-product-api.html">
+<link rel="import" href="../oc-single-product/oc-single-product.html">
 
 <dom-module id="oc-product-list">
   <template>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <style>
       :host {
         display: block;
+
+      }
+      .images img {
+        width:100%;
       }
     </style>
-    <h2>Hello [[prop1]]!</h2>
+    <oc-product-api id="productsApi"></oc-product-api>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-xs-12">
+          [[organisation.name]]
+        </div>
+        <div class="col-xs-12">
+          [Placeholder - Search Bar]
+        </div>
+        <div class="col-xs-12">
+          [Placeholder - Gategory Filter]
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+
+          <template is="dom-if" if="[[!_showProduct]]" id="view-single-product">
+
+
+
+          </template>
+
+          <template is="dom-repeat" items="[[_products]]" id="productSelection">
+
+            <!-- dom repeat for all the organisations products -->
+            <paper-card on-tap="_viewProduct">
+              <div class="card-content">
+
+                <div class="row">
+                  <div class="col-xs-12">
+
+                  </div>
+                  <div class="col-xs-4 images">
+                    <img src="[[item.images.0.thumbnail]]" alt="">
+                  </div>
+                  <div class="col-xs-4">
+                    <h5>[[item.name]]</h5>
+                    [[item.description]]
+                  </div>
+                  <div class="col-xs-4">
+                    <h5>R [[item.price]]</h5>
+                  </div>
+                </div>
+              </div>
+            </paper-card>
+          </template>
+        </div>
+      </div>
+    </div>
   </template>
 
   <script>
-    /**
-     * `oc-product-list`
-     * List of products
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
-    class OcProductList extends Polymer.Element {
-      static get is() { return 'oc-product-list'; }
-      static get properties() {
-        return {
-          prop1: {
-            type: String,
-            value: 'oc-product-list'
-          }
-        };
-      }
-    }
+      /**
+       * `oc-product-list`
+       * List of products
+       *
+       * @customElement
+       * @polymer
+       * @demo demo/index.html
+       */
+      class OcProductList extends Polymer.Element {
+          static get is() { return 'oc-product-list'; }
+          static get properties() {
+              return {
+                  _userId: Number,
+                  _productId: Number,
+                  _products: {
+                      type:Array,
+                      notify: true
+                  },
+                  _showProduct: {
+                      type: Boolean,
+                      value: false,
+                      notify: true
+                  },
+                  _organisationId: {
+                      type: Number,
+                      value: 318
+                  }
 
-    window.customElements.define(OcProductList.is, OcProductList);
+              }
+          }
+
+          static get observers() {
+              return [
+              ]
+          }
+
+          ready() {
+              super.ready();
+              this._init();
+          }
+
+          _init() {
+              this._fetchProducts(this.organisationId);
+          }
+
+
+          /**
+           * Fetches the products from an Organisation
+           *
+           *
+           * @param organisationId organisation receiving the payment
+           * @private
+           */
+          _fetchProducts(){
+              //this can be changed when we decide on paging
+              let page = 1;
+              let pageSize = -1;
+              let showDisabled = false;
+              let connectionTypeCode = "Marketplace";
+              this.$.productsApi.getProductsByOrganisation(page,pageSize,this._organisationId,showDisabled,connectionTypeCode)
+                  .then(function (request) {
+                      this._products = request.response.results;
+                  }.bind(this));
+          }
+
+          _viewProduct (e) {
+
+              this.dispatchEvent(new CustomEvent('view-product', {
+                  bubbles: true, composed: true, detail: {product: e.model.item}}));
+          }
+      }
+
+      window.customElements.define(OcProductList.is, OcProductList);
   </script>
 </dom-module>
