@@ -14,6 +14,10 @@
       }
       .images img {
         width:100%;
+        max-width:120px;
+      }
+      paper-card {
+        width:100%;
       }
     </style>
     <oc-product-api id="productsApi"></oc-product-api>
@@ -36,26 +40,28 @@
           <template is="dom-repeat" items="[[_products]]" id="productSelection">
 
             <!-- dom repeat for all the organisations products -->
-            <paper-card on-tap="_viewProduct">
-              <div class="card-content">
-
-                <div class="row">
-                  <div class="col-xs-12">
-
+            <div class="row">
+              <div class="col-xs-12">
+                <paper-card on-tap="_viewProduct">
+                  <div class="card-content">
+                    <div class="row">
+                      <div class="col-xs-12">
+                      </div>
+                      <div class="col-xs-4 images">
+                        <img src="[[item.images.0.thumbnail]]" alt="">
+                      </div>
+                      <div class="col-xs-4">
+                        <h5>[[item.name]]</h5>
+                        [[item.description]]
+                      </div>
+                      <div class="col-xs-4">
+                        <h5>R [[item.price]]</h5>
+                      </div>
+                    </div>
                   </div>
-                  <div class="col-xs-4 images">
-                    <img src="[[item.images.0.thumbnail]]" alt="">
-                  </div>
-                  <div class="col-xs-4">
-                    <h5>[[item.name]]</h5>
-                    [[item.description]]
-                  </div>
-                  <div class="col-xs-4">
-                    <h5>R [[item.price]]</h5>
-                  </div>
-                </div>
+                </paper-card>
               </div>
-            </paper-card>
+            </div>
           </template>
         </div>
       </div>
