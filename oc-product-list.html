@@ -20,26 +20,6 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-xs-12">
-          [[organisation.name]]
-        </div>
-        <div class="col-xs-12">
-          [Placeholder - Search Bar]
-        </div>
-        <div class="col-xs-12">
-          [Placeholder - Gategory Filter]
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-xs-12">
-
-          <template is="dom-if" if="[[!_showProduct]]" id="view-single-product">
-
-
-
-          </template>
-
-          <template is="dom-repeat" items="[[_products]]" id="productSelection">
-
             <!-- dom repeat for all the organisations products -->
             <paper-card on-tap="_viewProduct">
               <div class="card-content">
@@ -61,7 +41,6 @@
                 </div>
               </div>
             </paper-card>
-          </template>
         </div>
       </div>
     </div>
@@ -84,11 +63,6 @@
                   _productId: Number,
                   _products: {
                       type:Array,
-                      notify: true
-                  },
-                  _showProduct: {
-                      type: Boolean,
-                      value: false,
                       notify: true
                   },
                   _organisationId: {
