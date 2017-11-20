@@ -24,19 +24,11 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-xs-12">
-          [[_product.name]]
-        </div>
-        <div class="col-xs-12">
-          [Placeholder - Search Bar]
-        </div>
-        <div class="col-xs-12">
-          [Placeholder - Category Filter]
-        </div>
-      </div>
+
       <div class="row">
         <div class="col-xs-12">
 
-          <template is="dom-repeat" items="[[_products]]" id="productSelection">
+          <template is="dom-repeat" items="[[_products]]" id="productSelection" filter="{{computeFilter(tag)}}">
 
             <!-- dom repeat for all the organisations products -->
             <div class="row">
@@ -86,9 +78,8 @@
                       type:Array,
                       notify: true
                   },
-                  _showProduct: {
-                      type: Boolean,
-                      value: false,
+                  tag:{
+                      type:Number,
                       notify: true
                   },
                   organisationId: {
@@ -133,6 +124,24 @@
 
               this.dispatchEvent(new CustomEvent('view-product', {
                   bubbles: true, composed: true, detail: {product: e.model.item}}));
+          }
+
+          computeFilter(tag) {
+              if (!tag) {
+                  // set filter to null to disable filtering
+                  return null;
+              } else {
+                  // return a filter function for the current search string
+                  return function(product) {
+                      if (!product.tags) return false;
+                      let arrayLength =  product.tags.length;
+                      for (let i = 0; i < arrayLength; i++) {
+                          if(product.tags[i].id === tag){
+                              return true;
+                          }
+                      }
+                  };
+              }
           }
       }
 
