@@ -25,38 +25,42 @@
       <div class="row">
         <div class="col-xs-12">
 
-      <div class="row">
-        <div class="col-xs-12">
+          <div class="row">
+            <div class="col-xs-12">
+              <template is="dom-if" if="[[_loading]]">
+                Loading
+              </template>
+              <template is="dom-if" if="[[!_loading]]">
+                <template is="dom-repeat" items="[[_products]]" id="productSelection" filter="{{computeFilter(tag)}}">
 
-          <template is="dom-repeat" items="[[_products]]" id="productSelection" filter="{{computeFilter(tag)}}">
-
-            <!-- dom repeat for all the organisations products -->
-            <div class="row">
-              <div class="col-xs-12">
-                <paper-card on-tap="_viewProduct">
-                  <div class="card-content">
-                    <div class="row">
-                      <div class="col-xs-12">
-                      </div>
-                      <div class="col-xs-4 images">
-                        <img src="[[item.images.0.thumbnail]]" alt="">
-                      </div>
-                      <div class="col-xs-4">
-                        <h5>[[item.name]]</h5>
-                        [[item.description]]
-                      </div>
-                      <div class="col-xs-4">
-                        <h5>R [[item.price]]</h5>
-                      </div>
+                  <!-- dom repeat for all the organisations products -->
+                  <div class="row">
+                    <div class="col-xs-12">
+                      <paper-card on-tap="_viewProduct">
+                        <div class="card-content">
+                          <div class="row">
+                            <div class="col-xs-12">
+                            </div>
+                            <div class="col-xs-4 images">
+                              <img src="[[item.images.0.thumbnail]]" alt="">
+                            </div>
+                            <div class="col-xs-4">
+                              <h5>[[item.name]]</h5>
+                              [[item.shortDescription]]
+                            </div>
+                            <div class="col-xs-4">
+                              <h5>R [[item.price]]</h5>
+                            </div>
+                          </div>
+                        </div>
+                      </paper-card>
                     </div>
                   </div>
-                </paper-card>
-              </div>
+                </template>
+              </template>
             </div>
-          </template>
+          </div>
         </div>
-      </div>
-    </div>
   </template>
 
   <script>
@@ -85,8 +89,11 @@
                   organisationId: {
                       type: Object,
                       observer: '_fetchProducts'
+                  },
+                  _loading:{
+                      type: Boolean,
+                      notify:true
                   }
-
               }
           }
 
@@ -109,6 +116,7 @@
            */
           _fetchProducts(organisationId){
               //this can be changed when we decide on paging
+              this._loading = true;
 
               let page = 1;
               let pageSize = -1;
@@ -117,6 +125,8 @@
               this.$.productsApi.getProductsByOrganisation(page,pageSize,organisationId,showDisabled,connectionTypeCode)
                   .then(function (request) {
                       this._products = request.response.results;
+                      //fire event when finished loading
+                      this._loading = false;
                   }.bind(this));
           }
 
