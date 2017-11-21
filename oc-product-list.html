@@ -31,7 +31,7 @@
                 Loading
               </template>
               <template is="dom-if" if="[[!loading]]">
-                <template is="dom-repeat" items="[[products]]" id="productSelection" filter="{{computeFilter(tag)}}">
+                <template is="dom-repeat" items="[[products]]" id="productSelection" filter="{{computeFilter(tag, search)}}">
 
                   <!-- dom repeat for all the organisations products -->
                   <div class="row">
@@ -86,6 +86,11 @@
                       type:Number,
                       notify: true
                   },
+                  search:{
+                      type:String,
+                      notify: true,
+                      value: ""
+                  },
                   organisationId: {
                       type: Object,
                       observer: '_fetchProducts'
@@ -112,18 +117,31 @@
                   bubbles: true, composed: true, detail: {product: e.model.item}}));
           }
 
-          computeFilter(tag) {
-              if (!tag) {
+          computeFilter(tag, search) {
+              if (!tag && !search) {
                   // set filter to null to disable filtering
                   return null;
               } else {
                   // return a filter function for the current search string
                   return function(product) {
-                      if (!product.tags) return false;
-                      let arrayLength =  product.tags.length;
-                      for (let i = 0; i < arrayLength; i++) {
-                          if(product.tags[i].id === tag){
-                              return true;
+                      //if the products dont have tags and there is no search filter
+                      if ((!product.tags) && (search === "")) return false;
+
+                      //if the search string is not empty
+                      //and does not match the name
+                      if((search !== "") && (!~product.name.toLowerCase().indexOf(search.toLowerCase()))){
+                          return false;
+                          //if nog tag was sent return match
+                      } else if(!tag){
+                          return true;
+                          //else check if tag is present
+                      }else{
+                          //if there is no tag return as
+                          let arrayLength =  product.tags.length;
+                          for (let i = 0; i < arrayLength; i++) {
+                              if(product.tags[i].id === tag){
+                                  return true;
+                              }
                           }
                       }
                   };
