@@ -79,15 +79,15 @@
                   _userId: Number,
                   _productId: Number,
                   products: {
-                      type:Array,
+                      type: Array,
                       notify: true
                   },
-                  tag:{
-                      type:Number,
+                  tag: {
+                      type: Number,
                       notify: true
                   },
-                  search:{
-                      type:String,
+                  search: {
+                      type: String,
                       notify: true,
                       value: ""
                   },
@@ -98,7 +98,6 @@
                   loading: {
                       type: Boolean
                   }
-
               }
           }
 
@@ -118,6 +117,7 @@
           }
 
           computeFilter(tag, search) {
+
               if (!tag && !search) {
                   // set filter to null to disable filtering
                   return null;
