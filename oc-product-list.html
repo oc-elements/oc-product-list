@@ -32,7 +32,6 @@
               </template>
               <template is="dom-if" if="[[!loading]]">
                 <template is="dom-repeat" items="[[products]]" id="productSelection" filter="{{computeFilter(tag, search)}}">
-
                   <!-- dom repeat for all the organisations products -->
                   <div class="row">
                     <div class="col-xs-12">
@@ -49,7 +48,7 @@
                               [[item.shortDescription]]
                             </div>
                             <div class="col-xs-4">
-                              <h5>R [[item.price]]</h5>
+                              <h5>R [[_formatPrice(item.price)]]</h5>
                             </div>
                           </div>
                         </div>
@@ -147,7 +146,13 @@
                   };
               }
           }
+
+          _formatPrice(price){
+              return  price.toFixed(2);
+          }
       }
+
+
 
       window.customElements.define(OcProductList.is, OcProductList);
   </script>
