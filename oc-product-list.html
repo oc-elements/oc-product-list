@@ -16,50 +16,100 @@
         max-width:120px;
       }
       paper-card {
+
         width:100%;
+      }
+      .card-content {
+        padding:5px;
+      }
+
+      .discount {
+        height:50px;
+        width:50px;
+        border-radius: 50%;
+        background:#ED3736;
+        color:#fff;
+      }
+      .discount-heading {
+        text-align: center;
+        font-weight:bold;
+        padding: 8px 5px 0 5px;
+      }
+      .discount-value {
+        text-align: center;
+        padding: 0px 5px 5px 5px;
+        font-weight:bold;
+      }
+      .images {
+        padding:0 0 0 5px;
+      }
+
+      .discount-price {
+        color: #737070;
+        text-decoration: line-through;
+      }
+      .price {
+        font-weight:bold;
+        font-size:1.54em;
+      }
+      .small-price {
+        font-size:1em;
+        position:absolute;
+      }
+      .large-price {
+        font-size:1.55em;
+        font-weight:bold;
+        position:absolute;
+        left:26px;
       }
     </style>
     <oc-product-api id="productsApi"></oc-product-api>
-
     <div class="container-fluid">
       <div class="row">
         <div class="col-xs-12">
-
-          <div class="row">
-            <div class="col-xs-12">
-              <template is="dom-if" if="[[loading]]">
-                Loading
-              </template>
-              <template is="dom-if" if="[[!loading]]">
-                <template is="dom-repeat" items="[[products]]" id="productSelection" filter="{{computeFilter(tag, search)}}">
-                  <!-- dom repeat for all the organisations products -->
-                  <div class="row">
-                    <div class="col-xs-12">
-                      <paper-card on-tap="_viewProduct">
-                        <div class="card-content">
-                          <div class="row">
-                            <div class="col-xs-12">
+          <template is="dom-if" if="[[loading]]">
+            Loading
+          </template>
+          <template is="dom-if" if="[[!loading]]">
+            <template is="dom-repeat" items="[[products]]" id="productSelection" filter="{{computeFilter(tag, search)}}">
+              <!-- dom repeat for all the organisations products -->
+              <div class="row">
+                <div class="col-xs-12">
+                  <paper-card on-tap="_viewProduct">
+                    <div class="card-content">
+                      <div class="row">
+                        <div class="col-xs-4 images">
+                          <a href="">
+                            <img src="[[item.images.0.thumbnail]]" class="center-block" alt="">
+                          </a>
+                        </div>
+                        <div class="col-xs-4">
+                          <h5>[[item.name]]</h5>
+                          <template is="dom-if" if="[[item.discount]]">
+                            <div class="discount">
+                              <div class="discount-heading">SAVE</div>
+                              <div class="discount-value">[[item.discount.percentage]]%</div>
                             </div>
-                            <div class="col-xs-4 images">
-                              <img src="[[item.images.0.thumbnail]]" alt="">
-                            </div>
-                            <div class="col-xs-4">
-                              <h5>[[item.name]]</h5>
-                              [[item.shortDescription]]
-                            </div>
-                            <div class="col-xs-4">
-                              <h5>R [[_formatPrice(item.price)]]</h5>
-                            </div>
+                          </template>
+                        </div>
+                        <div class="col-xs-4">
+                          <template is="dom-if" if="[[item.discount]]">
+                            <span class="discount-price">[[item.discount.originalPrice]]</span>
+                          </template>
+                          <div>
+                            <span class="small-price">R</span><span class="large-price" id="product-price">[[_formatPrice(item.price)]]</span>
                           </div>
                         </div>
-                      </paper-card>
+                      </div>
                     </div>
-                  </div>
-                </template>
-              </template>
-            </div>
-          </div>
+                  </paper-card>
+                </div>
+              </div>
+            </template>
+          </template>
         </div>
+      </div>
+    </div>
   </template>
 
   <script>
