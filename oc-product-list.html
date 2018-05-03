@@ -5,205 +5,207 @@
 
 <dom-module id="oc-product-list">
   <template>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
     <style>
       :host {
         display: block;
+      }
 
+      img {
+        width: 120px;
+        height: 120px;
       }
-      .images img {
-        width:100%;
-        max-width:120px;
-      }
+
       paper-card {
-
-        width:100%;
+        height: 100%;
+        width: 100%;
       }
+
       .card-content {
-        padding:5px;
+        padding: 5px;
       }
 
       .discount {
-        height:50px;
-        width:50px;
+        height: 50px;
+        width: 50px;
         border-radius: 50%;
-        background:#ED3736;
-        color:#fff;
+        background: #ED3736;
+        color: #fff;
       }
+
       .discount-heading {
         text-align: center;
-        font-weight:bold;
+        font-weight: bold;
         padding: 8px 5px 0 5px;
       }
+
       .discount-value {
         text-align: center;
         padding: 0px 5px 5px 5px;
-        font-weight:bold;
-      }
-      .images {
-        padding:0 0 0 5px;
+        font-weight: bold;
       }
 
-      .discount-price {
-        color: #737070;
-        text-decoration: line-through;
+      .add-to-card {
+        background-color: #e0992f;
+        height: 2.5em;
+        font-size: 0.9em;
+        width: 95%;
       }
-      .price {
-        font-weight:bold;
-        font-size:1.54em;
+
+      .product-name {
+        font-size: 0.9em;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        display: block
       }
-      .small-price {
-        font-size:1em;
-        position:absolute;
-      }
-      .large-price {
-        font-size:1.55em;
-        font-weight:bold;
-        position:absolute;
-        left:26px;
+
+      .card-container {
+        border-bottom: lightgrey solid 1px;
+        padding: 0 !important;
+        text-align: -webkit-center;
+        color: white;
       }
     </style>
+
     <oc-product-api id="productsApi"></oc-product-api>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-xs-12">
-          <template is="dom-if" if="[[loading]]">
-            Loading
-          </template>
-          <template is="dom-if" if="[[!loading]]">
-            <template is="dom-repeat" items="[[products]]" id="productSelection" filter="{{computeFilter(tag, search)}}">
-              <!-- dom repeat for all the organisations products -->
-              <div class="row">
-                <div class="col-xs-12">
-                  <paper-card on-tap="_viewProduct">
-                    <div class="card-content">
-                      <div class="row">
-                        <div class="col-xs-4 images">
-                          <a href="">
-                            <img src="[[item.images.0.thumbnail]]" class="center-block" alt="">
-                          </a>
-                        </div>
-                        <div class="col-xs-4">
-                          <h5>[[item.name]]</h5>
-                          <template is="dom-if" if="[[item.discount]]">
-                            <div class="discount">
-                              <div class="discount-heading">SAVE</div>
-                              <div class="discount-value">[[item.discount.percentage]]%</div>
-                            </div>
-                          </template>
-                        </div>
-                        <div class="col-xs-4">
-                          <template is="dom-if" if="[[item.discount]]">
-                            <span class="discount-price">[[item.discount.originalPrice]]</span>
-                          </template>
-                          <div>
-                            <span class="small-price">R</span><span class="large-price" id="product-price">[[_formatPrice(item.price)]]</span>
-                          </div>
-                        </div>
+    <div>
+      <template is="dom-if" if="[[loading]]">
+        Loading
+      </template>
+      <template is="dom-if" if="[[!loading]]">
+
+        <div class="row">
+          <template is="dom-repeat" items="[[products]]" id="productSelection"
+                    filter="{{computeFilter(tag, search)}}">
+            <div class="col-6 card-container" style="[[_hasBorder(index)]]">
+              <paper-card>
+                <div class="card-content">
+                  <div on-tap="_viewProduct">
+                    <img src="[[item.images.0.thumbnail]]" class="center-block"
+                         style="margin-bottom: 10px" alt="">
+                    <div style="text-align: -webkit-left; padding-left: 14px;">
+                      <span class="product-name">[[item.name]]</span>
+                      <div style="color: #e0992f">
+                        <span>R</span><span
+                              id="product-price">[[_formatPrice(item.price)]]</span>
                       </div>
+                      <template is="dom-if" if="[[item.discount]]">
+                        <div class="discount">
+                          <div class="discount-heading">SAVE</div>
+                          <div class="discount-value">[[item.discount.percentage]]%</div>
+                        </div>
+                      </template>
                     </div>
-                  </paper-card>
+                  </div>
+                  <paper-button class="add-to-card" on-tap="_addToCart">Add to cart</paper-button>
                 </div>
-              </div>
-            </template>
+              </paper-card>
+            </div>
           </template>
         </div>
-      </div>
+      </template>
     </div>
   </template>
-
   <script>
-      /**
-       * `oc-product-list`
-       * List of products
-       *
-       * @customElement
-       * @polymer
-       * @demo demo/index.html
-       */
-      class OcProductList extends Polymer.Element {
-          static get is() { return 'oc-product-list'; }
-          static get properties() {
-              return {
-                  _userId: Number,
-                  _productId: Number,
-                  products: {
-                      type: Array,
-                      notify: true
-                  },
-                  tag: {
-                      type: Number,
-                      notify: true
-                  },
-                  search: {
-                      type: String,
-                      notify: true,
-                      value: ""
-                  },
-                  organisationId: {
-                      type: Object,
-                      observer: '_fetchProducts'
-                  },
-                  loading: {
-                      type: Boolean
-                  }
-              }
-          }
+	  /**
+	   * `oc-product-list`
+	   * List of products
+	   *
+	   * @customElement
+	   * @polymer
+	   * @demo demo/index.html
+	   */
+	  class OcProductList extends Ordercloud.ReduxMixin(Polymer.Element) {
+		  static get is() {
+			  return 'oc-product-list';
+		  }
 
-          ready() {
-              super.ready();
-              this._init();
-          }
+		  static get properties() {
+			  return {
+				  _userId: Number,
+				  _productId: Number,
+				  products: {
+					  type: Array,
+					  notify: true
+				  },
+				  tag: {
+					  type: Number,
+					  notify: true
+				  },
+				  search: {
+					  type: String,
+					  notify: true,
+					  value: ""
+				  },
+				  organisationId: {
+					  type: Object,
+					  observer: '_fetchProducts'
+				  },
+				  loading: {
+					  type: Boolean
+				  }
+			  }
+		  }
 
-          _init() {
+		  ready() {
+			  super.ready();
+		  }
 
-          }
+		  _addToCart() {
+			  this.dispatch('addToCart', {Test: "test"})
+		  }
 
-          _viewProduct (e) {
-
-              this.dispatchEvent(new CustomEvent('view-product', {
-                  bubbles: true, composed: true, detail: {product: e.model.item}}));
-          }
-
-          computeFilter(tag, search) {
-
-              if (!tag && !search) {
-                  // set filter to null to disable filtering
-                  return null;
-              } else {
-                  // return a filter function for the current search string
-                  return function(product) {
-                      //if the products dont have tags and there is no search filter
-                      if ((!product.tags) && (search === "")) return false;
-
-                      //if the search string is not empty
-                      //and does not match the name
-                      if((search !== "") && (!~product.name.toLowerCase().indexOf(search.toLowerCase()))){
-                          return false;
-                          //if nog tag was sent return match
-                      } else if(!tag){
-                          return true;
-                          //else check if tag is present
-                      }else{
-                          //if there is no tag return as
-                          let arrayLength =  product.tags.length;
-                          for (let i = 0; i < arrayLength; i++) {
-                              if(product.tags[i].id === tag){
-                                  return true;
-                              }
-                          }
-                      }
-                  };
-              }
-          }
-
-          _formatPrice(price){
-              return  price.toFixed(2);
-          }
-      }
+		  _hasBorder(index) {
+			  return (index % 2 == 0) ? "border-right: lightgrey solid 1px;" : "";
+		  }
 
 
+		  _viewProduct(e) {
 
-      window.customElements.define(OcProductList.is, OcProductList);
+			  this.dispatchEvent(new CustomEvent('view-product', {
+				  bubbles: true, composed: true, detail: {product: e.model.item}
+			  }));
+		  }
+
+		  computeFilter(tag, search) {
+
+			  if (!tag && !search) {
+				  // set filter to null to disable filtering
+				  return null;
+			  } else {
+				  // return a filter function for the current search string
+				  return function (product) {
+					  //if the products dont have tags and there is no search filter
+					  if ((!product.tags) && (search === "")) return false;
+
+					  //if the search string is not empty
+					  //and does not match the name
+					  if ((search !== "") && (!~product.name.toLowerCase().indexOf(search.toLowerCase()))) {
+						  return false;
+						  //if nog tag was sent return match
+					  } else if (!tag) {
+						  return true;
+						  //else check if tag is present
+					  } else {
+						  //if there is no tag return as
+						  let arrayLength = product.tags.length;
+						  for (let i = 0; i < arrayLength; i++) {
+							  if (product.tags[i].id === tag) {
+								  return true;
+							  }
+						  }
+					  }
+				  };
+			  }
+		  }
+
+		  _formatPrice(price) {
+			  return price.toFixed(2);
+		  }
+	  }
+
+
+	  window.customElements.define(OcProductList.is, OcProductList);
   </script>
 </dom-module>
