@@ -1,211 +1,242 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../paper-card/paper-card.html">
 <link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../oc-product-api/oc-product-api.html">
 
 <dom-module id="oc-product-list">
-  <template>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
-    <style>
-      :host {
-        display: block;
-      }
+    <template>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+        <style>
+            :host {
+                display: block;
+            }
 
-      img {
-        width: 120px;
-        height: 120px;
-      }
+            img {
+                width: 120px;
+                height: 120px;
+            }
 
-      paper-card {
-        height: 100%;
-        width: 100%;
-      }
+            paper-card {
+                height: 100%;
+                width: 100%;
+            }
 
-      .card-content {
-        padding: 5px;
-      }
+            .card-content {
+                padding: 5px;
+            }
 
-      .discount {
-        height: 50px;
-        width: 50px;
-        border-radius: 50%;
-        background: #ED3736;
-        color: #fff;
-      }
+            .discount {
+                height: 50px;
+                width: 50px;
+                border-radius: 50%;
+                background: #ED3736;
+                color: #fff;
+            }
 
-      .discount-heading {
-        text-align: center;
-        font-weight: bold;
-        padding: 8px 5px 0 5px;
-      }
+            .discount-heading {
+                text-align: center;
+                font-weight: bold;
+                padding: 8px 5px 0 5px;
+            }
 
-      .discount-value {
-        text-align: center;
-        padding: 0px 5px 5px 5px;
-        font-weight: bold;
-      }
+            .discount-value {
+                text-align: center;
+                padding: 0px 5px 5px 5px;
+                font-weight: bold;
+            }
 
-      .add-to-card {
-        background-color: #e0992f;
-        height: 2.5em;
-        font-size: 0.9em;
-        width: 95%;
-      }
+            .add-to-card {
+                background-color: #e0992f;
+                height: 2.5em;
+                font-size: 0.9em;
+                width: 95%;
+            }
 
-      .product-name {
-        font-size: 0.9em;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-        display: block
-      }
+            .product-name {
+                font-size: 0.9em;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                display: block
+            }
 
-      .card-container {
-        border-bottom: lightgrey solid 1px;
-        padding: 0 !important;
-        text-align: -webkit-center;
-        color: white;
-      }
-    </style>
+            .card-container {
+                border-bottom: lightgrey solid 1px;
+                padding: 0 !important;
+                text-align: -webkit-center;
+                color: white;
+            }
 
-    <oc-product-api id="productsApi"></oc-product-api>
-    <div>
-      <template is="dom-if" if="[[loading]]">
-        Loading
-      </template>
-      <template is="dom-if" if="[[!loading]]">
+            .dialog-confirm {
+                background-color: #e0992f;
+                width: 100%;
+                height: 40px;
+                margin: 10px auto auto;
+                color: #ffffff;
+            }
+        </style>
 
-        <div class="row">
-          <template is="dom-repeat" items="[[products]]" id="productSelection"
-                    filter="{{computeFilter(tag, search)}}">
-            <div class="col-6 card-container" style="[[_hasBorder(index)]]">
-              <paper-card>
-                <div class="card-content">
-                  <div on-tap="_viewProduct">
-                    <img src="[[item.images.0.thumbnail]]" class="center-block"
-                         style="margin-bottom: 10px" alt="">
-                    <div style="text-align: -webkit-left; padding-left: 14px;">
-                      <span class="product-name">[[item.name]]</span>
-                      <div style="color: #e0992f">
-                        <span>R</span><span
-                              id="product-price">[[_formatPrice(item.price)]]</span>
-                      </div>
-                      <template is="dom-if" if="[[item.discount]]">
-                        <div class="discount">
-                          <div class="discount-heading">SAVE</div>
-                          <div class="discount-value">[[item.discount.percentage]]%</div>
+        <oc-product-api id="productsApi"></oc-product-api>
+        <paper-dialog id="dialog" modal>
+            <paper-input type="number" pattern="[0-9]*" value="1" label="Quantity" id="quantity"
+                         tabindex="1"></paper-input>
+            <paper-button class="dialog-confirm" on-tap="_addProduct">Order</paper-button>
+        </paper-dialog>
+        <div>
+            <template is="dom-if" if="[[loading]]">
+                Loading
+            </template>
+            <template is="dom-if" if="[[!loading]]">
+
+                <div class="row">
+                    <template is="dom-repeat" items="[[products]]" id="productSelection"
+                              filter="{{computeFilter(tag, search)}}">
+                        <div class="col-6 card-container" style="[[_hasBorder(index)]]">
+                            <paper-card>
+                                <div class="card-content">
+                                    <div>
+                                        <img src="[[item.images.0.thumbnail]]" class="center-block"
+                                             style="margin-bottom: 10px" alt="">
+                                        <div style="text-align: -webkit-left; padding-left: 14px;">
+                                            <span class="product-name">[[item.name]]</span>
+                                            <div style="color: #e0992f">
+                                                <span>R</span><span
+                                                    id="product-price">[[_formatPrice(item.price)]]</span>
+                                            </div>
+                                            <template is="dom-if" if="[[item.discount]]">
+                                                <div class="discount">
+                                                    <div class="discount-heading">SAVE</div>
+                                                    <div class="discount-value">[[item.discount.percentage]]%</div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <paper-button class="add-to-card" on-tap="_addToCart">Add to cart</paper-button>
+                                </div>
+                            </paper-card>
                         </div>
-                      </template>
-                    </div>
-                  </div>
-                  <paper-button class="add-to-card" on-tap="_addToCart">Add to cart</paper-button>
+                    </template>
                 </div>
-              </paper-card>
-            </div>
-          </template>
+            </template>
         </div>
-      </template>
-    </div>
-  </template>
-  <script>
-	  /**
-	   * `oc-product-list`
-	   * List of products
-	   *
-	   * @customElement
-	   * @polymer
-	   * @demo demo/index.html
-	   */
-	  class OcProductList extends Ordercloud.ReduxMixin(Polymer.Element) {
-		  static get is() {
-			  return 'oc-product-list';
-		  }
+    </template>
+    <script>
+		/**
+		 * `oc-product-list`
+		 * List of products
+		 *
+		 * @customElement
+		 * @polymer
+		 * @demo demo/index.html
+		 */
+		class OcProductList extends Ordercloud.ReduxMixin(Polymer.Element) {
+			static get is() {
+				return 'oc-product-list';
+			}
 
-		  static get properties() {
-			  return {
-				  _userId: Number,
-				  _productId: Number,
-				  products: {
-					  type: Array,
-					  notify: true
-				  },
-				  tag: {
-					  type: Number,
-					  notify: true
-				  },
-				  search: {
-					  type: String,
-					  notify: true,
-					  value: ""
-				  },
-				  organisationId: {
-					  type: Object,
-					  observer: '_fetchProducts'
-				  },
-				  loading: {
-					  type: Boolean
-				  }
-			  }
-		  }
+			static get properties() {
+				return {
+					_userId: Number,
+					_product: {
+						type: Object,
+						value: {}
+					},
+					products: {
+						type: Array,
+						notify: true
+					},
+					tag: {
+						type: Number,
+						notify: true
+					},
+					search: {
+						type: String,
+						notify: true,
+						value: ""
+					},
+					organisationId: {
+						type: Object,
+						observer: '_fetchProducts'
+					},
+					loading: {
+						type: Boolean
+					}
+				}
+			}
 
-		  ready() {
-			  super.ready();
-		  }
+			ready() {
+				super.ready();
+			}
 
-		  _addToCart() {
-			  this.dispatch('addToCart', {Test: "test"})
-		  }
+			_addProduct() {
+				const productObject = {
+					item: this._product,
+					quantity: this.$.quantity.value
+				};
 
-		  _hasBorder(index) {
-			  return (index % 2 == 0) ? "border-right: lightgrey solid 1px;" : "";
-		  }
+				/* TODO: We need to notify user if it fails*/
+				this.dispatch('addToCart', productObject)
+					.then(() => {
+						this.$.dialog.close();
+					})
+			}
 
+			_addToCart(e) {
+				this._product = e.model.item;
+				this.$.dialog.open();
+			}
 
-		  _viewProduct(e) {
-
-			  this.dispatchEvent(new CustomEvent('view-product', {
-				  bubbles: true, composed: true, detail: {product: e.model.item}
-			  }));
-		  }
-
-		  computeFilter(tag, search) {
-
-			  if (!tag && !search) {
-				  // set filter to null to disable filtering
-				  return null;
-			  } else {
-				  // return a filter function for the current search string
-				  return function (product) {
-					  //if the products dont have tags and there is no search filter
-					  if ((!product.tags) && (search === "")) return false;
-
-					  //if the search string is not empty
-					  //and does not match the name
-					  if ((search !== "") && (!~product.name.toLowerCase().indexOf(search.toLowerCase()))) {
-						  return false;
-						  //if nog tag was sent return match
-					  } else if (!tag) {
-						  return true;
-						  //else check if tag is present
-					  } else {
-						  //if there is no tag return as
-						  let arrayLength = product.tags.length;
-						  for (let i = 0; i < arrayLength; i++) {
-							  if (product.tags[i].id === tag) {
-								  return true;
-							  }
-						  }
-					  }
-				  };
-			  }
-		  }
-
-		  _formatPrice(price) {
-			  return price.toFixed(2);
-		  }
-	  }
+			_hasBorder(index) {
+				return (index % 2 == 0) ? "border-right: lightgrey solid 1px;" : "";
+			}
 
 
-	  window.customElements.define(OcProductList.is, OcProductList);
-  </script>
+			_viewProduct(e) {
+
+				// this.dispatchEvent(new CustomEvent('view-product', {
+				// 	bubbles: true, composed: true, detail: {product: e.model.item}
+				// }));
+			}
+
+			computeFilter(tag, search) {
+
+				if (!tag && !search) {
+					// set filter to null to disable filtering
+					return null;
+				} else {
+					// return a filter function for the current search string
+					return function (product) {
+						//if the products dont have tags and there is no search filter
+						if ((!product.tags) && (search === "")) return false;
+
+						//if the search string is not empty
+						//and does not match the name
+						if ((search !== "") && (!~product.name.toLowerCase().indexOf(search.toLowerCase()))) {
+							return false;
+							//if nog tag was sent return match
+						} else if (!tag) {
+							return true;
+							//else check if tag is present
+						} else {
+							//if there is no tag return as
+							let arrayLength = product.tags.length;
+							for (let i = 0; i < arrayLength; i++) {
+								if (product.tags[i].id === tag) {
+									return true;
+								}
+							}
+						}
+					};
+				}
+			}
+
+			_formatPrice(price) {
+				return price.toFixed(2);
+			}
+		}
+
+
+		window.customElements.define(OcProductList.is, OcProductList);
+    </script>
 </dom-module>
