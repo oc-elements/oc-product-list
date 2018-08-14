@@ -3,133 +3,163 @@
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../oc-product-api/oc-product-api.html">
+<link rel="import" href="../../src/oc-button-styles.html">
 
 <dom-module id="oc-product-list">
-    <template>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
-        <style>
-            :host {
-                display: block;
-            }
+	<template>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+		<style include="oc-button-styles">
+			:host {
+				display: block;
+			}
 
-            img {
-                width: 120px;
-                height: 120px;
-            }
+			paper-card {
+				height: 100%;
+				width: 100%;
+			}
 
-            paper-card {
-                height: 100%;
-                width: 100%;
-            }
+			.card-content {
+				padding: 5px;
+			}
 
-            .card-content {
-                padding: 5px;
-            }
+			.discount {
+				height: 50px;
+				width: 50px;
+				border-radius: 50%;
+				background: #ED3736;
+				color: #fff;
+			}
 
-            .discount {
-                height: 50px;
-                width: 50px;
-                border-radius: 50%;
-                background: #ED3736;
-                color: #fff;
-            }
+			.discount-heading {
+				text-align: center;
+				font-weight: bold;
+				padding: 8px 5px 0 5px;
+			}
 
-            .discount-heading {
-                text-align: center;
-                font-weight: bold;
-                padding: 8px 5px 0 5px;
-            }
+			.discount-value {
+				text-align: center;
+				padding: 0px 5px 5px 5px;
+				font-weight: bold;
+			}
 
-            .discount-value {
-                text-align: center;
-                padding: 0px 5px 5px 5px;
-                font-weight: bold;
-            }
 
-            .add-to-card {
-                background-color: #e0992f;
-                height: 2.5em;
-                font-size: 0.9em;
-                width: 95%;
-            }
+			.product-name {
+				font-size: 1.25em;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				overflow: hidden;
+				display: block;
+				padding: 5px;
+				background: #c3c5c9;
+				color: var(--app-primary-color);
+				border-radius: 5px 5px 0 0;
+				text-align: center;
+				font-weight: bold;
+			}
 
-            .product-name {
-                font-size: 0.9em;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-                display: block
-            }
+			.card-container {
+				padding: 0 !important;
+				text-align: center;
+				color: white;
+			}
 
-            .card-container {
-                border-bottom: lightgrey solid 1px;
-                padding: 0 !important;
-                text-align: -webkit-center;
-                color: white;
-            }
+			.dialog-confirm {
+				background-color: #e0992f;
+				width: 100%;
+				height: 40px;
+				margin: 10px auto auto;
+				color: #ffffff;
+			}
 
-            .dialog-confirm {
-                background-color: #e0992f;
-                width: 100%;
-                height: 40px;
-                margin: 10px auto auto;
-                color: #ffffff;
-            }
-        </style>
+			.image-container {
+				background: #fff;
+				text-align: center;
+				height: 130px;
+				/* equals max image height */
+				white-space: nowrap;
+				/* this is required unless you put the helper span closely near the img */
+				text-align: center;
+			}
 
-        <oc-product-api id="productsApi"></oc-product-api>
-        <paper-dialog id="dialog" modal>
-            <paper-input type="number" pattern="[0-9]*" value="1" label="Quantity" id="quantity"
-                         tabindex="1"></paper-input>
-            <paper-button class="dialog-confirm" on-tap="_addProduct">Order</paper-button>
-        </paper-dialog>
-        <div>
-            <template is="dom-if" if="[[loading]]">
-                Loading
-            </template>
-            <template is="dom-if" if="[[!loading]]">
+			.price-container {
+				color: #fff;
+				border-radius: 0 0 5px 5px;
+				background: #8b8b8f;
+				text-align: center;
+				padding: 5px;
+				font-weight: bold;
+				font-size: 1.5em;
+			}
 
-                <div class="row">
-                    <template is="dom-repeat" items="[[products]]" id="productSelection"
-                              filter="{{computeFilter(tag, search)}}">
-                        <div class="col-6 card-container" style="[[_hasBorder(index)]]">
-                            <paper-card>
-                                <div class="card-content">
-                                    <div>
-                                        <img src="[[item.images.0.thumbnail]]" class="center-block"
-                                             style="margin-bottom: 10px" alt="">
-                                        <div style="text-align: -webkit-left; padding-left: 14px;">
-                                            <span class="product-name">[[item.name]]</span>
-                                            <div style="color: #e0992f">
-                                                <span>R</span><span
-                                                    id="product-price">[[_formatPrice(item.price)]]</span>
-                                            </div>
-                                            <template is="dom-if" if="[[item.discount]]">
-                                                <div class="discount">
-                                                    <div class="discount-heading">SAVE</div>
-                                                    <div class="discount-value">[[item.discount.percentage]]%</div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                    <paper-button class="add-to-card" on-tap="_addToCart">Add to cart</paper-button>
-                                </div>
-                            </paper-card>
-                        </div>
-                    </template>
-                </div>
-            </template>
-        </div>
-    </template>
-    <script>
-		/**
-		 * `oc-product-list`
-		 * List of products
-		 *
-		 * @customElement
-		 * @polymer
-		 * @demo demo/index.html
-		 */
+			.helper {
+				/* Aligns the image to the middle of the div */
+				display: inline-block;
+				height: 100%;
+				vertical-align: middle;
+			}
+
+			.helper-img {
+				vertical-align: middle;
+				max-height: 130px;
+				padding: 5px;
+			}
+		</style>
+
+		<oc-product-api id="productsApi"></oc-product-api>
+		<paper-dialog id="dialog" modal entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+			<paper-input type="number" pattern="[0-9]*" value="1" label="Quantity [[item.name]]" id="quantity" tabindex="1"></paper-input>
+			<paper-button class="dialog-confirm" on-tap="_addProduct">Add to Cart</paper-button>
+			<paper-button dialog-dismiss class="secondary-button">Cancel</paper-button>
+		</paper-dialog>
+		<div>
+			<template is="dom-if" if="[[loading]]">
+				Loading
+			</template>
+			<template is="dom-if" if="[[!loading]]">
+				<div class="row">
+					<template is="dom-repeat" items="[[products]]" id="productSelection" filter="{{computeFilter(tag, search)}}">
+						<!-- style="[[_hasBorder(index)]]"-->
+						<div class="col-6 card-container">
+							<paper-card elevation="0">
+								<div class="card-content">
+									<div on-tap="_addToCart">
+										<div style="text-align:left;" class="px-2">
+											<span class="product-name">[[item.name]]</span>
+											<span>[[item.detail.description]]</span>
+											<div class="image-container">
+												<span class="helper">
+												</span>
+												<img src="[[item.images.0.thumbnail]]" alt="[[item.name]]" class="helper-img">
+											</div>
+											<div class="price-container">
+												<span>R</span>
+												<span id="product-price">[[_formatPrice(item.price)]]</span>
+											</div>
+											<template is="dom-if" if="[[item.discount]]">
+												<div class="discount">
+													<div class="discount-heading">SAVE</div>
+													<div class="discount-value">[[item.discount.percentage]]%</div>
+												</div>
+											</template>
+										</div>
+									</div>
+								</div>
+							</paper-card>
+						</div>
+					</template>
+				</div>
+			</template>
+		</div>
+	</template>
+	<script>
+        /**
+         * `oc-product-list`
+         * List of products
+         *
+         * @customElement
+         * @polymer
+         * @demo demo/index.html
+         */
 		class OcProductList extends Ordercloud.ReduxMixin(Polymer.Element) {
 			static get is() {
 				return 'oc-product-list';
@@ -238,5 +268,5 @@
 
 
 		window.customElements.define(OcProductList.is, OcProductList);
-    </script>
+	</script>
 </dom-module>
