@@ -213,8 +213,16 @@
 			}
 
 			_addToCart(e) {
+				// Clear quantity before rendering
+				this.$.quantity.value = "";
+
 				this._product = e.model.item;
 				this.$.dialog.open();
+
+				// This is kind of hack for Sumni device so that the amount get focused after dialog has been created
+				Polymer.Async.timeOut.run(() => {
+					this.$.quantity.focus();
+				}, 500);
 			}
 
 			_hasBorder(index) {
