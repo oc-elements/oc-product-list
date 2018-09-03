@@ -3,6 +3,7 @@
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../oc-product-api/oc-product-api.html">
+
 <link rel="import" href="../../src/oc-button-styles.html">
 
 <dom-module id="oc-product-list">
@@ -205,11 +206,12 @@
 					quantity: this.$.quantity.value
 				};
 
-				/* TODO: We need to notify user if it fails*/
-				this.dispatch('addToCart', productObject)
-					.then(() => {
-						this.$.dialog.close();
-					})
+				// Call the event that has been registed in the parent component
+				this.dispatchEvent(new CustomEvent('add-to-cart', {
+					bubbles: true, composed: true, detail: productObject
+				}));
+
+				this.$.dialog.close();
 			}
 
 			_addToCart(e) {
