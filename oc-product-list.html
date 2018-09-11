@@ -3,6 +3,7 @@
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../oc-product-api/oc-product-api.html">
+<link rel="import" href="../oc-core-utils/oc-formatter.html">
 
 <link rel="import" href="../../src/oc-button-styles.html">
 
@@ -144,8 +145,7 @@
 										<img src="[[item.images.0.thumbnail]]" class="helper-img">
 									</div>
 									<div class="price-container">
-										<span>R</span>
-										<span id="product-price">[[_formatPrice(item.price)]]</span>
+										<span id="product-price">[[formatMoneyAmount(item.price)]]</span>
 									</div>
 									<template is="dom-if" if="[[item.discount]]">
 										<div class="discount">
@@ -162,15 +162,15 @@
 		</div>
 	</template>
 	<script>
-        /**
-         * `oc-product-list`
-         * List of products
-         *
-         * @customElement
-         * @polymer
-         * @demo demo/index.html
-         */
-		class OcProductList extends Ordercloud.ReduxMixin(Polymer.Element) {
+		/**
+		 * `oc-product-list`
+		 * List of products
+		 *
+		 * @customElement
+		 * @polymer
+		 * @demo demo/index.html
+		 */
+		class OcProductList extends Ordercloud.ReduxMixin(Ordercloud.Formatter(Polymer.Element)) {
 			static get is() {
 				return 'oc-product-list';
 			}
@@ -233,7 +233,7 @@
 				// This is kind of hack for Sumni device so that the amount get focused after dialog has been created
 				Polymer.Async.timeOut.run(() => {
 					this.$.quantity.focus();
-				}, 500);
+			}, 500);
 			}
 
 			_hasBorder(index) {
