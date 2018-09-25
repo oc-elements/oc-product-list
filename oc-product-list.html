@@ -4,6 +4,9 @@
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../oc-product-api/oc-product-api.html">
 <link rel="import" href="../oc-core-utils/oc-formatter.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/editor-icons.html">
 
 <link rel="import" href="../../src/oc-button-styles.html">
 
@@ -115,6 +118,14 @@
 				max-height: 130px;
 				padding: 5px;
 			}
+			.no-image-container {
+				color: #899aa7;
+			}
+			.no-image-container iron-icon {
+				width:80px;
+				height:80px;
+				padding-top: 20px;
+			}
 		</style>
 
 		<oc-product-api id="productsApi"></oc-product-api>
@@ -140,9 +151,18 @@
 									<span class="pack-size">[[item.shortDescription]]</span>
 
 									<div class="image-container">
+										<template is="dom-if" if="[[item.images.0.thumbnail]]">
 										<span class="helper">
 										</span>
-										<img src="[[item.images.0.thumbnail]]" class="helper-img">
+											<img src="[[item.images.0.thumbnail]]" class="helper-img">
+										</template>
+										<template is="dom-if" if="[[!item.images.0.thumbnail]]">
+
+											<div class="no-image-container">
+												<iron-icon icon="editor:insert-photo"></iron-icon>
+												<p>No Image</p>
+											</div>
+										</template>
 									</div>
 									<div class="price-container">
 										<span id="product-price">[[formatMoneyAmount(item.price)]]</span>
