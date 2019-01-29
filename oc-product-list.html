@@ -24,7 +24,7 @@
 			}
 
 			.card-content {
-				padding: 5px;
+				padding:0 !important;
 			}
 
 			.discount {
@@ -96,7 +96,7 @@
 			.image-container {
 				background: #fff;
 				text-align: center;
-				height: 100px;
+				height: 100%;
 				/* equals max image height */
 				white-space: nowrap;
 				/* this is required unless you put the helper span closely near the img */
@@ -124,8 +124,9 @@
 
 			.helper-img {
 				vertical-align: middle;
-				max-height: 100px;
-				padding: 5px;
+				/*max-height: 100px;*/
+				width: 100%;
+				padding: 2px;
 			}
 			.no-image-container {
 				color: #899aa7;
@@ -151,8 +152,8 @@
 				<div class="row px-1">
 					<template is="dom-repeat" items="[[products]]" id="productSelection" filter="{{computeFilter(tag, search)}}">
 						<!-- style="[[_hasBorder(index)]]"-->
-						<div class="col-6 col-md-3 col-lg-2 card-container">
-							<paper-card elevation="0">
+						<div class="col-6 col-md-3 col-lg-2 card-container p-1">
+							<paper-card elevation="1">
 								<div class="card-content" on-tap="_addToCart">
 									<div class="product-name-container">
 										<span class="product-name">[[item.name]]</span>
@@ -160,8 +161,8 @@
 									</div>
 									<div class="image-container">
 										<template is="dom-if" if="[[item.images.0.thumbnail]]">
-										<span class="helper">
-										</span>
+											<!--<span class="helper">-->
+											</span>
 											<img src="[[item.images.0.thumbnail]]" class="helper-img">
 										</template>
 										<template is="dom-if" if="[[!item.images.0.thumbnail]]">
@@ -261,7 +262,7 @@
 				// This is kind of hack for Sumni device so that the amount get focused after dialog has been created
 				Polymer.Async.timeOut.run(() => {
 					this.$.quantity.focus();
-			}, 500);
+				}, 500);
 			}
 
 			_hasBorder(index) {
