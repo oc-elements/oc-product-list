@@ -160,12 +160,12 @@
 										<span class="pack-size">[[item.shortDescription]]</span>
 									</div>
 									<div class="image-container">
-										<template is="dom-if" if="[[item.images.0.thumbnail]]">
+										<template is="dom-if" if="[[item.images.0.name]]">
 											<!--<span class="helper">-->
 											</span>
-											<img src="[[item.images.0.thumbnail]]" class="helper-img">
+											<img src="[[item.images.0.name]]" class="helper-img">
 										</template>
-										<template is="dom-if" if="[[!item.images.0.thumbnail]]">
+										<template is="dom-if" if="[[!item.images.0.name]]">
 
 											<div class="no-image-container">
 												<iron-icon icon="editor:insert-photo"></iron-icon>
