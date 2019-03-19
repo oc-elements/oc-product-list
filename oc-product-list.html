@@ -1,4 +1,6 @@
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
 <link rel="import" href="../paper-card/paper-card.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
@@ -140,6 +142,17 @@
 
 		<oc-product-api id="productsApi"></oc-product-api>
 		<paper-dialog id="dialog" modal entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+			<template is="dom-if" if="[[_product.optionSets.0]]">
+				<paper-dropdown-menu label="Select Option" horizontal-align="left" flex style="width:100%;">
+					<paper-listbox id="accountId" slot="dropdown-content" selected="{{_selectedOption}}" attr-for-selected="value" style="width:100%;">
+						<template is="dom-repeat" items="[[_product.optionSets.0.options]]">
+							<paper-item value="[[item]]">
+								[[item.name]] @ R[[item.price]]
+							</paper-item>
+						</template>
+					</paper-listbox>
+				</paper-dropdown-menu>
+			</template>
 			<paper-input type="number" pattern="[0-9]*" value="1" label="Quantity [[item.name]]" id="quantity" tabindex="1"></paper-input>
 			<paper-button class="dialog-confirm" on-tap="_addProduct">Add to Cart</paper-button>
 			<paper-button dialog-dismiss class="secondary-button">Cancel</paper-button>
@@ -166,22 +179,28 @@
 											<img src="[[item.images.0.name]]" class="helper-img">
 										</template>
 										<template is="dom-if" if="[[!item.images.0.name]]">
-
 											<div class="no-image-container">
 												<iron-icon icon="editor:insert-photo"></iron-icon>
 												<p>No Image</p>
 											</div>
 										</template>
 									</div>
-									<div class="price-container">
-										<span id="product-price">[[formatMoneyAmount(item.price)]]</span>
-									</div>
+									<template is="dom-if" if="[[options]]">
+										[[option.minimumAmount]] - [[option.maxAmount]]
+									</template>
+									<template is="dom-if" if="[[!options]]">
+										<div class="price-container">
+											<span id="product-price">[[formatMoneyAmount(item.price)]]</span>
+										</div>
+									</template>
+
 									<template is="dom-if" if="[[item.discount]]">
 										<div class="discount">
 											<div class="discount-heading">SAVE</div>
 											<div class="discount-value">[[item.discount.percentage]]%</div>
 										</div>
 									</template>
+									[[option]]
 								</div>
 							</paper-card>
 						</div>
@@ -224,6 +243,9 @@
 						notify: true,
 						value: ""
 					},
+					productObject: {
+						type:Object
+					},
 					organisationId: {
 						type: Object,
 						observer: '_fetchProducts'
@@ -236,21 +258,47 @@
 
 			ready() {
 				super.ready();
+				this._computeMinMaxPrice();
 			}
 
 			_addProduct() {
-				const productObject = {
-					item: this._product,
-					quantity: this.$.quantity.value
-				};
+				if(this._product.optionSets.length === 0) {
+					this.productObject = {
+						item: this._product,
+						quantity: this.$.quantity.value
+					}
+				}
+				else {
+					this.mainProduct = {
+						item: this._product,
+						quantity: this.$.quantity.value,
+
+					};
+					this.productOption = {
+						item:  {
+
+						},
+					};
+					let productMerged = Object.assign({}, this.mainProduct.item, this.productOption.item );
+					this.productObject = {
+						item: productMerged,
+						quantity: this.$.quantity.value,
+						options: this._selectedOption
+					}
+				}
+
+
 
 				// Call the event that has been registed in the parent component
 				this.dispatchEvent(new CustomEvent('add-to-cart', {
-					bubbles: true, composed: true, detail: productObject
+					bubbles: true, composed: true, detail: this.productObject
 				}));
 
 				this.$.dialog.close();
 			}
+
+
+
 
 			_addToCart(e) {
 				// Clear quantity before rendering
