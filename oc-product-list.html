@@ -185,10 +185,10 @@
 											</div>
 										</template>
 									</div>
-									<template is="dom-if" if="[[options]]">
+									<template is="dom-if" if="[[item.options]]">
 										[[option.minimumAmount]] - [[option.maxAmount]]
 									</template>
-									<template is="dom-if" if="[[!options]]">
+									<template is="dom-if" if="[[!item.options]]">
 										<div class="price-container">
 											<span id="product-price">[[formatMoneyAmount(item.price)]]</span>
 										</div>
