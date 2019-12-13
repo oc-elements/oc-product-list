@@ -9,6 +9,8 @@
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="../iron-icons/editor-icons.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-item/paper-icon-item.html">
 
 <link rel="import" href="../../src/oc-button-styles.html">
 
@@ -30,17 +32,20 @@
 			}
 
 			.discount {
-				height: 50px;
-				width: 50px;
-				border-radius: 50%;
-				background: #ED3736;
+				position: absolute;
+				bottom:32px;
+				right: 0;
+				height: 40px;
+				width: 100px;
+				background: #8CD018;
 				color: #fff;
 			}
 
 			.discount-heading {
 				text-align: center;
 				font-weight: bold;
-				padding: 8px 5px 0 5px;
+				font-size: 26px;
+				padding: 2px 5px 0 5px;
 			}
 
 			.discount-value {
@@ -68,6 +73,16 @@
 				padding: 5px;
 				color: var(--app-primary-color);
 				text-align: center;
+			}
+			.product-label {
+				position: absolute;
+				background: rgb(37, 138, 255);
+				font-size: 14px;
+				height: 28px;
+				padding: 4px 5px;
+				width: 100%;
+				text-align: center;
+				font-weight: 600;
 			}
 
 			/* Added this style here to have ellipse on second line */
@@ -143,7 +158,7 @@
 		<oc-product-api id="productsApi"></oc-product-api>
 		<paper-dialog id="dialog" modal entry-animation="scale-up-animation" exit-animation="fade-out-animation">
 			<template is="dom-if" if="[[_product.optionSets.0]]">
-				<paper-dropdown-menu label="Select Option" horizontal-align="left" flex style="width:100%;">
+				<paper-dropdown-menu label="Select Option" horizontal-align="left" flex style="width:100%;" >
 					<paper-listbox id="accountId" slot="dropdown-content" selected="{{_selectedOption}}" attr-for-selected="value" style="width:100%;">
 						<template is="dom-repeat" items="[[_product.optionSets.0.options]]">
 							<paper-item value="[[item]]">
@@ -152,10 +167,30 @@
 						</template>
 					</paper-listbox>
 				</paper-dropdown-menu>
+
+				<template is="dom-if" if="[[_selectedOption]]">
+					<paper-input type="number" pattern="[0-9]*" value="{{_quantity}}" label="Quantity [[item.name]]" id="quantity" tabindex="1" required  auto-validate></paper-input>
+				</template>
+
+				<template is="dom-if" if="[[!_quantity]]">
+					<paper-button class="secondary-button" required>Add to Cart</paper-button>
+				</template>
+				<template is="dom-if" if="[[_quantity]]">
+						<paper-button class="dialog-confirm" on-tap="_addProduct" required auto-validate>Add to Cart</paper-button>
+					</template>
+				<paper-button dialog-dismiss on-tap="_clearSelected" class="secondary-button">Cancel</paper-button>
 			</template>
-			<paper-input type="number" pattern="[0-9]*" value="1" label="Quantity [[item.name]]" id="quantity" tabindex="1"></paper-input>
-			<paper-button class="dialog-confirm" on-tap="_addProduct">Add to Cart</paper-button>
-			<paper-button dialog-dismiss class="secondary-button">Cancel</paper-button>
+
+			<template is="dom-if" if="[[!_product.optionSets.0]]">
+				<paper-input type="number" pattern="[0-9]*" value="{{_quantity}}" label="Quantity [[item.name]]" id="quantity" tabindex="1" required  auto-validate></paper-input>
+				<template is="dom-if" if="[[!_quantity]]">
+					<paper-button class="secondary-button" required>Add to Cart</paper-button>
+				</template>
+				<template is="dom-if" if="[[_quantity]]">
+						<paper-button class="dialog-confirm" on-tap="_addProduct" required auto-validate>Add to Cart</paper-button>
+					</template>
+				<paper-button dialog-dismiss class="secondary-button">Cancel</paper-button>
+			</template>
 		</paper-dialog>
 		<div>
 			<template is="dom-if" if="[[loading]]">
@@ -172,6 +207,11 @@
 										<span class="product-name">[[item.name]]</span>
 										<span class="pack-size">[[item.shortDescription]]</span>
 									</div>
+									<template is="dom-if" if="[[item.tags.0.description]]">
+										<div class="product-label">
+											[[item.tags.0.description]]
+										</div>
+									</template>
 									<div class="image-container">
 										<template is="dom-if" if="[[item.images.0.name]]">
 											<!--<span class="helper">-->
@@ -183,21 +223,26 @@
 												<iron-icon icon="editor:insert-photo"></iron-icon>
 												<p>No Image</p>
 											</div>
+											<template is="dom-if" if="[[item.discount]]">
+												<div class="discount">
+													<div class="discount-heading">[[item.discount.percentage]]%</div>
+												</div>
+											</template>
+										</template>
+										<template is="dom-if" if="[[item.discount]]">
+											<div class="discount">
+												<div class="discount-heading">[[item.discount.percentage]]%</div>
+											</div>
 										</template>
 									</div>
-									<template is="dom-if" if="[[item.options]]">
-										[[option.minimumAmount]] - [[option.maxAmount]]
-									</template>
-									<template is="dom-if" if="[[!item.options]]">
+									<template is="dom-if" if="[[item.optionSets.0]]">
 										<div class="price-container">
-											<span id="product-price">[[formatMoneyAmount(item.price)]]</span>
+											From: [[formatMoneyAmount(item.minPrice)]]
 										</div>
 									</template>
-
-									<template is="dom-if" if="[[item.discount]]">
-										<div class="discount">
-											<div class="discount-heading">SAVE</div>
-											<div class="discount-value">[[item.discount.percentage]]%</div>
+									<template is="dom-if" if="[[!item.optionSets.0]]">
+										<div class="price-container">
+											<span id="product-price">[[formatMoneyAmount(item.price)]]</span>
 										</div>
 									</template>
 									[[option]]
@@ -246,32 +291,74 @@
 					productObject: {
 						type:Object
 					},
-					organisationId: {
-						type: Object,
-						observer: '_fetchProducts'
+					__quantity: {
+						type: Number,
+						value: 1
 					},
 					loading: {
-						type: Boolean
+						type: Boolean,
+						observer: '_calculateMinValue'
+					},
+					_isValid: {
+						type: Boolean,
+						value: false
+					},
+					itemReady: {
+						type:Boolean,
+						value:false,
+						observer: 'isItemReady'
 					}
 				}
 			}
 
 			ready() {
+				this._calculateMinValue();
 				super.ready();
+
+			}
+
+			_calculateMinValue() {
+
+				for (var i = 0; i < this.products.length; i++ ) {
+					if(this.products[i].optionSets.length > 0) {
+						for (var x = 0; x < this.products[i].optionSets[0].options.length; x++) {
+						var options = this.products[i].optionSets[0].options;
+						 this.products[i].minPrice = Math.min(...options.map(o => o.price));
+						}
+					}
+				}
+			}
+
+			isItemReady() {
+				if (this._quantity > 0 && (this._product != null || this._selectedOption != null) ) {
+					this.itemReady = true;
+				}
+				else {
+					this.itemReady = false;
+				}
+			}
+
+			validate(){
+				this.isItemReady();
 			}
 
 			_addProduct() {
+
+
+				if (this._quantity > 0 && (this._product != null || this._selectedOption != null) ) {
+					this.itemReady = true;
+				};
 				if(this._product.optionSets.length === 0) {
 					this.productObject = {
 						item: this._product,
-						quantity: this.$.quantity.value
+						quantity: this._quantity
 					}
+
 				}
-				else {
+				else if (this._product.optionSets.length > 0) {
 					this.mainProduct = {
 						item: this._product,
-						quantity: this.$.quantity.value,
-
+						quantity: this._quantity,
 					};
 					this.productOption = {
 						item:  {
@@ -281,11 +368,10 @@
 					let productMerged = Object.assign({}, this.mainProduct.item, this.productOption.item );
 					this.productObject = {
 						item: productMerged,
-						quantity: this.$.quantity.value,
+						quantity: this._quantity,
 						options: this._selectedOption
 					}
 				}
-
 
 
 				// Call the event that has been registed in the parent component
@@ -296,15 +382,25 @@
 				this.$.dialog.close();
 			}
 
-
+			_clearSelected() {
+				this._selectedOption = null;
+				this._quantity = null;
+			}
 
 
 			_addToCart(e) {
 				// Clear quantity before rendering
-				this.$.quantity.value = "";
+				this._quantity = '';
+				this._selectedOption = null;
 
 				this._product = e.model.item;
+
+
 				this.$.dialog.open();
+
+				if (this._quantity != '') {
+					this.itemReady = true;
+				};
 
 				// This is kind of hack for Sumni device so that the amount get focused after dialog has been created
 				Polymer.Async.timeOut.run(() => {
