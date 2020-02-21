@@ -76,11 +76,12 @@
 			}
 			.product-label {
 				position: absolute;
-				background: rgb(37, 138, 255);
+				background: rgba(37, 138, 255, 0.95);
 				font-size: 14px;
 				height: 28px;
 				padding: 4px 5px;
 				width: 100%;
+				z-index: 3;
 				text-align: center;
 				font-weight: 600;
 			}
@@ -149,9 +150,9 @@
 				color: #899aa7;
 			}
 			.no-image-container iron-icon {
-				width:80px;
-				height:80px;
-				padding-top: 20px;
+				width:100%;
+				height:100%;
+				z-index: 1;
 			}
 		</style>
 
@@ -221,7 +222,13 @@
 										<template is="dom-if" if="[[!item.images.0.name]]">
 											<div class="no-image-container">
 												<iron-icon icon="editor:insert-photo"></iron-icon>
-												<p>No Image</p>
+												<p style="position: absolute;
+												top: 40%;
+												color: #becdd8;
+												margin: 0 auto;
+												text-align: center;
+												width: 100%;
+												z-index: 1;">No Preview</p>
 											</div>
 											<template is="dom-if" if="[[item.discount]]">
 												<div class="discount">
