@@ -202,8 +202,11 @@
 					<template is="dom-repeat" items="[[products]]" id="productSelection" filter="{{computeFilter(tag, search)}}">
 						<!-- style="[[_hasBorder(index)]]"-->
 						<div class="col-6 col-md-3 col-lg-2 card-container p-1">
+						<template is="dom-if" if="[[item.description]]">
 							<paper-card elevation="1">
-								<div class="card-content" on-tap="_addToCart">
+
+								<div class="card-content" on-tap="_viewProduct">
+
 									<div class="product-name-container">
 										<span class="product-name">[[item.name]]</span>
 										<span class="pack-size">[[item.shortDescription]]</span>
@@ -255,6 +258,64 @@
 									[[option]]
 								</div>
 							</paper-card>
+						</template>
+						<template is="dom-if" if="[[!item.description]]">
+								<paper-card elevation="1">
+
+									<div class="card-content" on-tap="_addToCart">
+
+										<div class="product-name-container">
+											<span class="product-name">[[item.name]]</span>
+											<span class="pack-size">[[item.shortDescription]]</span>
+										</div>
+										<template is="dom-if" if="[[item.tags.0.description]]">
+											<div class="product-label">
+												[[item.tags.0.shortDescription]]
+											</div>
+										</template>
+										<div class="image-container">
+											<template is="dom-if" if="[[item.images.0.name]]">
+												<!--<span class="helper">-->
+												</span>
+												<img src="[[item.images.0.name]]" class="helper-img">
+											</template>
+											<template is="dom-if" if="[[!item.images.0.name]]">
+												<div class="no-image-container">
+													<iron-icon icon="editor:insert-photo"></iron-icon>
+													<p style="position: absolute;
+													top: 40%;
+													color: #becdd8;
+													margin: 0 auto;
+													text-align: center;
+													width: 100%;
+													z-index: 1;">No Preview</p>
+												</div>
+												<template is="dom-if" if="[[item.discount]]">
+													<div class="discount">
+														<div class="discount-heading">[[item.discount.percentage]]%</div>
+													</div>
+												</template>
+											</template>
+											<template is="dom-if" if="[[item.discount]]">
+												<div class="discount">
+													<div class="discount-heading">[[item.discount.percentage]]%</div>
+												</div>
+											</template>
+										</div>
+										<template is="dom-if" if="[[item.optionSets.0]]">
+											<div class="price-container">
+												From: [[formatMoneyAmount(item.minPrice)]]
+											</div>
+										</template>
+										<template is="dom-if" if="[[!item.optionSets.0]]">
+											<div class="price-container">
+												<span id="product-price">[[formatMoneyAmount(item.price)]]</span>
+											</div>
+										</template>
+										[[option]]
+									</div>
+								</paper-card>
+							</template>
 						</div>
 					</template>
 				</div>
@@ -422,9 +483,9 @@
 
 			_viewProduct(e) {
 
-				// this.dispatchEvent(new CustomEvent('view-product', {
-				// 	bubbles: true, composed: true, detail: {product: e.model.item}
-				// }));
+				this.dispatchEvent(new CustomEvent('view-product', {
+					bubbles: true, composed: true, detail: {product: e.model.item}
+				}));
 			}
 
 			computeFilter(tag, search) {
