@@ -158,6 +158,7 @@
 
 		<oc-product-api id="productsApi"></oc-product-api>
 		<paper-dialog id="dialog" modal entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+			<template is="dom-if" if="[[_product.available]]">
 			<template is="dom-if" if="[[_product.optionSets.0]]">
 				<paper-dropdown-menu label="Select Option" horizontal-align="left" flex style="width:100%;" >
 					<paper-listbox id="accountId" slot="dropdown-content" selected="{{_selectedOption}}" attr-for-selected="value" style="width:100%;">
@@ -173,8 +174,8 @@
 					<paper-input type="number" pattern="[0-9]*" value="{{_quantity}}" label="Quantity [[item.name]]" id="quantity" tabindex="1" required  auto-validate></paper-input>
 				</template>
 
-				<template is="dom-if" if="[[!_quantity]]">
-					<paper-button class="secondary-button" required>Add to Cart</paper-button>
+				<template is="dom-if" if="[[!itemReady]]">
+					<paper-button class="secondary-button" required>Out of Stock</paper-button>
 				</template>
 				<template is="dom-if" if="[[_quantity]]">
 						<paper-button class="dialog-confirm" on-tap="_addProduct" required auto-validate>Add to Cart</paper-button>
@@ -182,14 +183,19 @@
 				<paper-button dialog-dismiss on-tap="_clearSelected" class="secondary-button">Cancel</paper-button>
 			</template>
 
-			<template is="dom-if" if="[[!_product.optionSets.0]]">
-				<paper-input type="number" pattern="[0-9]*" value="{{_quantity}}" label="Quantity [[item.name]]" id="quantity" tabindex="1" required  auto-validate></paper-input>
-				<template is="dom-if" if="[[!_quantity]]">
-					<paper-button class="secondary-button" required>Add to Cart</paper-button>
-				</template>
-				<template is="dom-if" if="[[_quantity]]">
-						<paper-button class="dialog-confirm" on-tap="_addProduct" required auto-validate>Add to Cart</paper-button>
+				<template is="dom-if" if="[[!_product.optionSets.0]]">
+					<paper-input type="number" pattern="[0-9]*" value="{{_quantity}}" label="Quantity [[item.name]]" id="quantity" tabindex="1" required  auto-validate></paper-input>
+					<template is="dom-if" if="[[!_quantity]]">
+						<paper-button class="secondary-button" required>Add to Cart</paper-button>
 					</template>
+					<template is="dom-if" if="[[_quantity]]">
+							<paper-button class="dialog-confirm" on-tap="_addProduct" required auto-validate>Add to Cart</paper-button>
+						</template>
+					<paper-button dialog-dismiss class="secondary-button">Cancel</paper-button>
+				</template>
+			</template>
+			<template is="dom-if" if="[[!_product.available]]">
+				<span>Out of Stock</span>
 				<paper-button dialog-dismiss class="secondary-button">Cancel</paper-button>
 			</template>
 		</paper-dialog>
@@ -203,10 +209,10 @@
 						<!-- style="[[_hasBorder(index)]]"-->
 						<div class="col-6 col-md-3 col-lg-2 card-container p-1" style="z-index: 0">
 						<template is="dom-if" if="[[item.description]]">
-							<paper-card elevation="1">
-
+							<!-- if product is available-->
+							<template is="dom-if" if="[[item.available]]">
+							<paper-card elevation="1" >
 								<div class="card-content" on-tap="_viewProduct">
-
 									<div class="product-name-container">
 										<span class="product-name">[[item.name]]</span>
 										<span class="pack-size">[[item.shortDescription]]</span>
@@ -258,6 +264,63 @@
 									[[option]]
 								</div>
 							</paper-card>
+							</template>
+								<!-- if product with options is not available-->
+								<template is="dom-if" if="[[!item.available]]">
+										<paper-card elevation="1" >
+											<div class="card-content">
+												<div class="product-name-container">
+													<span class="product-name">[[item.name]]</span>
+													<span class="pack-size">[[item.shortDescription]]</span>
+												</div>
+												<template is="dom-if" if="[[item.tags.0.description]]">
+													<div class="product-label">
+														[[item.tags.0.shortDescription]]
+													</div>
+												</template>
+												<div class="image-container">
+													<template is="dom-if" if="[[item.images.0.name]]">
+														<!--<span class="helper">-->
+														</span>
+														<img src="[[item.images.0.name]]" class="helper-img">
+													</template>
+													<template is="dom-if" if="[[!item.images.0.name]]">
+														<div class="no-image-container">
+															<iron-icon icon="editor:insert-photo"></iron-icon>
+															<p style="position: absolute;
+															top: 40%;
+															color: #becdd8;
+															margin: 0 auto;
+															text-align: center;
+															width: 100%;
+															z-index: 1;">No Preview</p>
+														</div>
+														<template is="dom-if" if="[[item.discount]]">
+															<div class="discount">
+																<div class="discount-heading">[[item.discount.percentage]]%</div>
+															</div>
+														</template>
+													</template>
+													<template is="dom-if" if="[[item.discount]]">
+														<div class="discount">
+															<div class="discount-heading">[[item.discount.percentage]]%</div>
+														</div>
+													</template>
+												</div>
+												<template is="dom-if" if="[[item.optionSets.0]]">
+													<div class="price-container">
+														[[formatMoneyAmount(item.minPrice)]] (Out of Stock)
+													</div>
+												</template>
+												<template is="dom-if" if="[[!item.optionSets.0]]">
+													<div class="price-container">
+														<span id="product-price">[[formatMoneyAmount(item.price)]] (Out of Stock)</span>
+													</div>
+												</template>
+												[[option]]
+											</div>
+										</paper-card>
+										</template>
 						</template>
 						<template is="dom-if" if="[[!item.description]]">
 								<paper-card elevation="1">
@@ -310,6 +373,7 @@
 										<template is="dom-if" if="[[!item.optionSets.0]]">
 											<div class="price-container">
 												<span id="product-price">[[formatMoneyAmount(item.price)]]</span>
+												<template is="dom-if" if="[[!item.available]]">(Out of Stock)</template>
 											</div>
 										</template>
 										[[option]]
@@ -398,7 +462,8 @@
 			}
 
 			isItemReady() {
-				if (this._quantity > 0 && (this._product != null || this._selectedOption != null) ) {
+				if (this._quantity > 0 && (this._product != null || this._selectedOption != null) && this._product.available === true )
+				  {
 					this.itemReady = true;
 				}
 				else {
@@ -413,8 +478,11 @@
 			_addProduct() {
 
 
-				if (this._quantity > 0 && (this._product != null || this._selectedOption != null) ) {
+				if (this._quantity > 0 && (this._product != null || this._selectedOption != null) && this._product.available === true ) {
 					this.itemReady = true;
+				}
+				else {
+					this.itemReady = false;
 				};
 				if(this._product.optionSets.length === 0) {
 					this.productObject = {
@@ -443,11 +511,13 @@
 
 
 				// Call the event that has been registed in the parent component
+				if (this.itemReady) {
 				this.dispatchEvent(new CustomEvent('add-to-cart', {
 					bubbles: true, composed: true, detail: this.productObject
 				}));
 
 				this.$.dialog.close();
+			}
 			}
 
 			_clearSelected() {
